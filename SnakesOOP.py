@@ -3,7 +3,7 @@ import random
 from pygame.math import Vector2
 
 
-class Snake:
+class Snake():
     def __init__(self, a, b, c, color):
         self.body = [a, b, c]
         self.color = color
@@ -32,15 +32,16 @@ class Snake:
         self.new_block = True
 
 
-class Food:
+class Food():
     def __init__(self):
         self.snake = Snake(Vector2(7, 10), Vector2(6, 10), Vector2(5, 10), 'blue')
         self.snake2 = Snake(Vector2(7, 5), Vector2(6, 5), Vector2(5, 5), 'purple')
+        self.snack = pygame.image.load('mushroom.png').convert_alpha()
         self.randomize()
 
     def draw_food(self):
         fruit_rect = pygame.Rect(int(self.pos.x * cell_size), int(self.pos.y * cell_size), cell_size, cell_size)
-        screen.blit(snack, fruit_rect)
+        screen.blit(self.snack, fruit_rect)
 
     def randomize(self):
         badspawn = True
@@ -58,11 +59,15 @@ class Food:
                         badspawn = False
 
 
-class Game:
+class Game():
     def __init__(self):
         self.snake = Snake(Vector2(7, 10), Vector2(6, 10), Vector2(5, 10), 'blue')
         self.snake2 = Snake(Vector2(7, 5), Vector2(6, 5), Vector2(5, 5), 'purple')
         self.snack = Food()
+        self.clock = pygame.time.Clock()
+        self.game_font = pygame.font.Font('PoetsenOne-Regular.ttf', 25)
+        self.running = True
+        self.endgame = False
 
     def update(self):
         self.snake.move_snake()
@@ -98,7 +103,7 @@ class Game:
                 self.game_over()
 
     def game_over(self):
-        pygame.quit()
+        main()
 
     def draw_grid(self):
         grid_color = (167, 209, 61)
@@ -111,8 +116,8 @@ class Game:
     def draw_score(self):
         score_text = 'Snake1: ' + str(len(self.snake.body) - 3)
         score_text2 = 'Snake2: ' + str(len(self.snake2.body) - 3)
-        score_surface = game_font.render(score_text, True, (56, 74, 12))
-        score_surface2 = game_font.render(score_text2, True, (56, 74, 12))
+        score_surface = self.game_font.render(score_text, True, (56, 74, 12))
+        score_surface2 = self.game_font.render(score_text2, True, (56, 74, 12))
         score_x = int(cell_size * cell_number - 730)
         score_y = int(cell_size * cell_number - 40)
         score_x2 = int(cell_size * cell_number - 80)
@@ -122,55 +127,68 @@ class Game:
         screen.blit(score_surface, score_rect)
         screen.blit(score_surface2, score_rect2)
 
+    def message(self, message, x, y):
+        self.text = self.game_font.render(message, True, (0, 200, 0))
+        self.textRect = self.text.get_rect()
+        self.textRect.center = (x, y)
+        screen.blit(self.text, self.textRect)
+
+    def game_loop(self):
+        game = Game()
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+                    pygame.quit()
+                if event.type == SCREEN_UPDATE:
+                    game.update()
+                if event.type == pygame.KEYDOWN:
+                    # snake1
+                    if event.key == pygame.K_UP:
+                        if game.snake.direction.y != 1:
+                            game.snake.direction = Vector2(0, -1)
+                    if event.key == pygame.K_DOWN:
+                        if game.snake.direction.y != -1:
+                            game.snake.direction = Vector2(0, 1)
+                    if event.key == pygame.K_RIGHT:
+                        if game.snake.direction.x != -1:
+                            game.snake.direction = Vector2(1, 0)
+                    if event.key == pygame.K_LEFT:
+                        if game.snake.direction.x != 1:
+                            game.snake.direction = Vector2(-1, 0)
+                    # snake2
+                    if event.key == pygame.K_w:
+                        if game.snake2.direction.y != 1:
+                            game.snake2.direction = Vector2(0, -1)
+                    if event.key == pygame.K_s:
+                        if game.snake2.direction.y != -1:
+                            game.snake2.direction = Vector2(0, 1)
+                    if event.key == pygame.K_d:
+                        if game.snake2.direction.x != -1:
+                            game.snake2.direction = Vector2(1, 0)
+                    if event.key == pygame.K_a:
+                        if game.snake2.direction.x != 1:
+                            game.snake2.direction = Vector2(-1, 0)
+
+            screen.fill((175, 215, 70))
+            game.draw_elements()
+            pygame.display.update()
+            self.clock.tick(60)
+
 
 pygame.init()
 cell_size = 40
 cell_number = 20
 screen = pygame.display.set_mode((cell_number * cell_size, cell_number * cell_size))
-clock = pygame.time.Clock()
-snack = pygame.image.load('mushroom.png').convert_alpha()
-game_font = pygame.font.Font('PoetsenOne-Regular.ttf', 25)
-
-game = Game()
+pygame.display.set_caption('Snakes')
 
 SCREEN_UPDATE = pygame.USEREVENT
 pygame.time.set_timer(SCREEN_UPDATE, 100)
 
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-        if event.type == SCREEN_UPDATE:
-            game.update()
-        if event.type == pygame.KEYDOWN:
-            # snake1
-            if event.key == pygame.K_UP:
-                if game.snake.direction.y != 1:
-                    game.snake.direction = Vector2(0, -1)
-            if event.key == pygame.K_DOWN:
-                if game.snake.direction.y != -1:
-                    game.snake.direction = Vector2(0, 1)
-            if event.key == pygame.K_RIGHT:
-                if game.snake.direction.x != -1:
-                    game.snake.direction = Vector2(1, 0)
-            if event.key == pygame.K_LEFT:
-                if game.snake.direction.x != 1:
-                    game.snake.direction = Vector2(-1, 0)
-            # snake2
-            if event.key == pygame.K_w:
-                if game.snake2.direction.y != 1:
-                    game.snake2.direction = Vector2(0, -1)
-            if event.key == pygame.K_s:
-                if game.snake2.direction.y != -1:
-                    game.snake2.direction = Vector2(0, 1)
-            if event.key == pygame.K_d:
-                if game.snake2.direction.x != -1:
-                    game.snake2.direction = Vector2(1, 0)
-            if event.key == pygame.K_a:
-                if game.snake2.direction.x != 1:
-                    game.snake2.direction = Vector2(-1, 0)
 
-    screen.fill((175, 215, 70))
-    game.draw_elements()
-    pygame.display.update()
-    clock.tick(60)
+def main():
+    Game().game_loop()
+
+
+if __name__ == '__main__':
+    main()
