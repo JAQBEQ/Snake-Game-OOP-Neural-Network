@@ -127,12 +127,6 @@ class Game():
         screen.blit(score_surface, score_rect)
         screen.blit(score_surface2, score_rect2)
 
-    def message(self, message, x, y):
-        self.text = self.game_font.render(message, True, (0, 200, 0))
-        self.textRect = self.text.get_rect()
-        self.textRect.center = (x, y)
-        screen.blit(self.text, self.textRect)
-
     def game_loop(self):
         game = Game()
         while True:
